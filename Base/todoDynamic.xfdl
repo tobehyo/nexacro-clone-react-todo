@@ -1,0 +1,322 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FDL version="2.1">
+  <Form id="todoDynamic" width="1920" height="1080" titletext="New Form" onload="todoDynamic_onload" cssclass="todolist">
+    <Layouts>
+      <Layout height="1080" mobileorientation="landscape" width="1920">
+        <Static id="Static00" taborder="0" text="TODO LIST" left="0" top="10" cssclass="h1" fittocontents="none" height="60" right="0"/>
+        <Div id="Div00" taborder="1" text="Div00" left="39.48%" top="90" width="400" cssclass="container" height="400">
+          <Layouts>
+            <Layout>
+              <Edit id="Edit00" taborder="0" left="10" top="10" height="47" onkeydown="Div00_Edit00_onkeydown" right="10"/>
+            </Layout>
+            <Layout name="Tablet_screen"/>
+            <Layout name="Phone_screen">
+              <Edit id="Edit00" left="10" top="10" height="47" right="10"/>
+            </Layout>
+          </Layouts>
+        </Div>
+        <Div id="Div00_00" taborder="2" text="Div00" left="40.21%" top="1090" width="400" cssclass="container" height="310" visible="false">
+          <Layouts>
+            <Layout>
+              <Edit id="Edit00" taborder="0" left="10" top="10" height="47" onkeydown="Div00_Edit00_onkeydown" right="10" displaynulltext="Sample" visible="true"/>
+              <Div id="Div00" taborder="1" text="Div00" left="10" top="Edit00:15" height="50" formscrollbartype="none" cssclass="card" right="10">
+                <Layouts>
+                  <Layout>
+                    <Static id="Static00" taborder="0" left="5" top="2" width="60%" bottom="2" text="Learn about React"/>
+                    <Button id="Button00" taborder="1" text="isCompleted" left="Static00:5" top="5" width="30%" bottom="5" onclick="Div00_00_Div00_Button00_onclick"/>
+                    <Button id="Button01" taborder="2" text="X" left="Button00:2" top="5" right="2" bottom="5"/>
+                  </Layout>
+                </Layouts>
+              </Div>
+              <Div id="Div00_00" taborder="2" text="Div00" left="10" top="Div00:5" height="50" formscrollbartype="none" cssclass="card" right="10">
+                <Layouts>
+                  <Layout>
+                    <Static id="Static00" taborder="0" left="5" top="2" width="60%" bottom="2%" text="Meet friend for lunch"/>
+                    <Button id="Button00" taborder="1" text="isCompleted" left="Static00:5" top="5" width="30%" bottom="5"/>
+                    <Button id="Button01" taborder="2" text="X" left="Button00:2" top="5" right="2" bottom="5"/>
+                  </Layout>
+                </Layouts>
+              </Div>
+            </Layout>
+            <Layout name="Tablet_screen"/>
+            <Layout name="Phone_screen">
+              <Edit id="Edit00" left="10" top="10" height="47" right="10"/>
+            </Layout>
+          </Layouts>
+        </Div>
+      </Layout>
+    </Layouts>
+    <Objects>
+      <Dataset id="dsTodo">
+        <ColumnInfo>
+          <Column id="divTodoId" type="STRING" size="256"/>
+          <Column id="text" type="STRING" size="256"/>
+          <Column id="isCompleted" type="STRING" size="256"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="text">Learn about React</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+          <Row>
+            <Col id="text">Meet friend for lunch</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+          <Row>
+            <Col id="text">Build really cool todo app</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+        </Rows>
+      </Dataset>
+    </Objects>
+    <Script type="xscript5.1"><![CDATA[this.Div00_Edit00_onkeydown = function(obj:nexacro.Edit,e:nexacro.KeyEventInfo)
+{
+	// if press "Enter" key, add todo list.
+	if(e.keycode == 13 && obj.value) {
+		var nRow = this.dsTodo.addRow();
+		this.dsTodo.setColumn(nRow, "text", obj.value);
+		this.dsTodo.setColumn(nRow, "isCompleted", false);
+		this.addTodoList(false, nRow, obj.value, this.Div00, this.dsTodo);
+		obj.set_value("");
+		obj.setFocus();
+	}
+};
+
+this.todoDynamic_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
+{
+// 	this.dsTodo.set_enableevent(false);
+// 	for(var i=0; i<1000; i++) {
+// 		var nRow = this.dsTodo.addRow();
+// 		this.dsTodo.setColumn(nRow, "text", "Learn about React"+i);
+// 		this.dsTodo.setColumn(nRow, "isCompleted", false);
+// 	}
+// 	this.dsTodo.set_enableevent(true);
+
+	// initialize todo list from dsTodo dataset
+	this.addTodoList(true, null, null, this.Div00, this.dsTodo);
+};
+
+
+this.createObjId = function(strID, idx, targetObj) {
+	
+	// check divTodo object exist or not
+	var isExist = targetObj.lookup(strID+idx);
+	//trace(strID, idx, isExist);
+	if(isExist) {
+		return this.createObjId(strID, idx+1, targetObj);
+	}
+	return strID + idx;
+}
+
+this.addTodoList = function(initialize, nRow, msg, parentDiv, targetDataset) {
+		
+	if(initialize) {
+		var cnt = targetDataset.rowcount;
+		for(var i=0; i<cnt; i++) {
+			this._addTodoList(i, targetDataset.getColumn(i, "text"), parentDiv, targetDataset);
+		}
+		
+	} else {
+		this._addTodoList(nRow, msg, parentDiv, targetDataset);
+	}
+	parentDiv.form.resetScroll();
+}
+
+this._addTodoList = function(nRow, msg, parentDiv, targetDataset) {
+
+	// const value object	
+	var divTodo = {
+		name: "divTodo",
+		fistTopPos: "Edit00",
+		left: "10px",
+		top: "5px",
+		width: null,
+		height: "50px",
+		right: "10px",
+		bottom: null
+	};
+	
+	var staticText = {
+	
+		left: "5px",
+		top: "2px",
+		width: "60%",
+		height: null,
+		right: null,
+		bottom: "2px",
+		text: ""
+	};		
+	
+	var btnCompleted = {
+	
+		left: "5px",
+		top: "5px",
+		width: "30%",
+		height: null,
+		right: null,
+		bottom: "5px",
+		text: "isCompleted"
+	};		
+
+	var btnClose = {
+	
+		left: "2px",
+		top: "5px",
+		width: null,
+		height: null,
+		right: "2px",
+		bottom: "5px",
+		text: "X"
+	};
+
+		/** 
+		* you can see top property syntax in nexacro reference guide. press F1
+		* 
+		* Syntax top property :  nTop ::= [<strCompID> ':'] <nVal> ['px' | '%']
+		* For instance : this.Button00.set_top("Button00:10px");
+		* <strCompID> is the ID of a component, which serves as a base for determining the top-point of component relatively
+		*
+		**/
+		
+		// create divTodo object
+		
+		var divTodoName = this.createObjId(divTodo.name, nRow, parentDiv.form);
+		var objDiv = new Div();
+		
+		// set top posision target
+		
+		// for initialize dsTodo dataset data
+		
+		if(nRow == 0) {
+			var targetTopPos = divTodo.fistTopPos + ":" + divTodo.top;
+		}
+		
+		if(nRow > 0) {
+			
+			var targetTopPos = divTodo.name + (nRow-1) + ":" + divTodo.top;
+			
+			// check divTodo id when add todo list
+			if(targetDataset) {
+				var targetTopPos = targetDataset.getColumn(nRow-1, "divTodoId") + ":" + divTodo.top;
+			}				
+		}
+		
+		objDiv.init(divTodoName, divTodo.left, targetTopPos, divTodo.width, divTodo.height, divTodo.right, divTodo.bottom);
+		objDiv.set_cssclass("card");
+
+		// set dsTodo dataset row info to divTodo object
+		objDiv.rowidx = nRow;
+		
+		// set divTodoId to dsTodo dataset
+		this.dsTodo.setColumn(nRow, "divTodoId", divTodoName);
+		
+		
+		// add divTodo object to Div00
+		parentDiv.form.addChild(divTodoName, objDiv);
+		
+		// create text static object
+		var staticTextName = "staticText";
+		var objStatic = new Static();
+		objStatic.init(staticTextName, staticText.left, staticText.top, staticText.width, staticText.height, staticText.right, staticText.bottom);
+		
+		// set Text
+		staticText.text = msg;
+		objStatic.set_text(staticText.text);
+		
+		// add staticText object to divTodo object
+		parentDiv.form.components[divTodoName].addChild(staticTextName,objStatic);
+		
+		// create isCompleted button object
+		var buttonCompletedName = "btnCompleted";
+		var objButton = new Button();
+		var btnLeft = staticTextName + ":" + btnCompleted.left
+		objButton.init(buttonCompletedName, btnLeft, btnCompleted.top, btnCompleted.width, btnCompleted.height, btnCompleted.right, btnCompleted.bottom);
+		objButton.set_text(btnCompleted.text);
+		
+		// add onclick event
+		objButton.addEventHandler( "onclick", this.button_isCompleted_onclick, this);			
+		
+		// add isCompleted button to divTodo object
+		parentDiv.form.components[divTodoName].addChild(buttonCompletedName, objButton);
+		
+		// create delete button object
+		var buttonCloseName = "btnClose";
+		var objButton = new Button();
+		var btnLeft = buttonCompletedName + ":" + btnClose.left
+		objButton.init(buttonCloseName, btnLeft, btnClose.top, btnClose.width, btnClose.height, btnClose.right, btnClose.bottom);
+		objButton.set_text(btnClose.text);
+		
+		// add onclick event
+		objButton.addEventHandler( "onclick", this.button_delete_onclick, this);
+		
+		// add delete button to divTodo object
+		parentDiv.form.components[divTodoName].addChild(buttonCloseName, objButton);
+		
+		// show object if call parent show method it will show all child object
+		objDiv.show();
+		
+}
+
+this.button_isCompleted_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
+{
+
+	// set isCompleted flag true or false.
+	var objDivTodo = obj.parent.parent;
+	var targetRow = objDivTodo.rowidx;
+	var isCompleted = this.dsTodo.getColumn(targetRow, "isCompleted");
+	
+	if(isCompleted == "false") {
+
+		this.dsTodo.setColumn( targetRow, "isCompleted", true );
+		objDivTodo.form.staticText.set_textDecoration("line-through");
+		
+	} else {
+	
+		this.dsTodo.setColumn( targetRow, "isCompleted", false );
+		objDivTodo.form.staticText.set_textDecoration("");
+	}
+};
+
+this.button_delete_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
+{
+
+	// delete todo list	
+	var targetObj = obj.parent.parent;
+	var targetRow = targetObj.rowidx;
+	this.dsTodo.deleteRow(targetRow);
+	
+	var cnt = this.dsTodo.rowcount;
+	// set position
+	// set new posistion next todo list after remove todo item
+	for(var i = 0; i<cnt; i++) {
+	
+		if(targetRow > 0 && i==0) {
+			continue;
+		}
+		
+		if(targetRow == 0 && i==0) {
+			var preTodoID = "Edit00";
+		} else {
+			var preTodoID = this.dsTodo.getColumn(i-1, "divTodoId");
+		}
+		
+		var nextTodoID = this.dsTodo.getColumn(i, "divTodoId");
+		var nextTodo = this.Div00.form.lookup(nextTodoID);
+		// set row index again
+		nextTodo.rowidx = i;
+		
+		nextTodo.set_top(preTodoID + ":" + "5px");			
+	}
+		
+	
+	// Destroy Object
+	this.Div00.form.removeChild(targetObj.name); 
+	targetObj.destroy(); 
+	targetObj = null;
+	
+	this.Div00.form.resetScroll();
+};
+
+]]></Script>
+  </Form>
+</FDL>

@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FDL version="2.1">
+  <Form id="todoListView" width="1920" height="1080" titletext="New Form" onload="todoListView_onload" cssclass="todolist">
+    <Layouts>
+      <Layout height="1080" mobileorientation="landscape" width="1920">
+        <Static id="Static00" taborder="0" text="TODO LIST" left="0" top="10" cssclass="h1" fittocontents="none" height="60" right="0"/>
+        <Div id="Div00" taborder="1" text="Div00" left="39.48%" top="90" width="400" cssclass="container" height="400">
+          <Layouts>
+            <Layout>
+              <Edit id="Edit00" taborder="0" left="10" top="10" height="47" onkeydown="Div00_Edit00_onkeydown" right="10"/>
+              <ListView id="ListView00" taborder="1" left="10" top="65" binddataset="dsTodo" right="10" bottom="10" oncellclick="Div00_ListView00_oncellclick">
+                <Formats>
+                  <Format id="default">
+                    <Band id="body" width="100%" height="50" background="#fff" border="0px none,0px none,1px solid #e8e8e8">
+                      <Cell id="Cell01" left="5" top="2" width="60%" text="bind:text" bottom="2" border="1px none #dbdee2" cssclass="card"/>
+                      <Cell id="Cell03" left="Cell01:10" top="2" width="25%" text="isCompleted" displaytype="buttoncontrol" edittype="none" bottom="2" padding="0px" border="0px none"/>
+                      <Cell id="Cell00" left="Cell03:2" top="2" bottom="2" right="5" text="X" displaytype="buttoncontrol" padding="0px" border="0px none"/>
+                    </Band>
+                  </Format>
+                </Formats>
+              </ListView>
+            </Layout>
+            <Layout name="Tablet_screen"/>
+            <Layout name="Phone_screen">
+              <Edit id="Edit00" left="10" top="10" height="47" right="10"/>
+            </Layout>
+          </Layouts>
+        </Div>
+      </Layout>
+    </Layouts>
+    <Objects>
+      <Dataset id="dsTodo" onrowsetchanged="dsTodo_onrowsetchanged">
+        <ColumnInfo>
+          <Column id="text" type="STRING" size="256"/>
+          <Column id="isCompleted" type="STRING" size="256"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="text">Learn about React</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+          <Row>
+            <Col id="text">Meet friend for lunch</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+          <Row>
+            <Col id="text">Build really cool todo app</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+        </Rows>
+      </Dataset>
+    </Objects>
+    <Script type="xscript5.1"><![CDATA[
+this.todoListView_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
+{
+	this.Div00.form.ListView00.setCellProperty("body", "Cell01", "cssclass", "expr:isCompleted=='true'?'strike':''");
+	
+	this.dsTodo.set_enableevent(false);
+	this.Div00.form.ListView00.set_enableevent(false);
+	this.Div00.form.ListView00.set_enableredraw(false);
+	
+	for(var i=0; i<100000; i++) {
+		var nRow = this.dsTodo.addRow();
+		this.dsTodo.setColumn(nRow, "text", "Learn about React"+i);
+		this.dsTodo.setColumn(nRow, "isCompleted", false);
+	}
+	
+	this.Div00.form.ListView00.set_enableredraw(true);
+	this.Div00.form.ListView00.set_enableevent(true);
+	this.dsTodo.set_enableevent(true);	
+};
+
+this.Div00_ListView00_oncellclick = function(obj:nexacro.ListView,e:nexacro.ListViewClickEventInfo)
+{
+	var targetRow = e.row;
+	if(e.cellid == "Cell03") {
+		
+		var isComplated = this.dsTodo.getColumn(targetRow, "isCompleted");
+		
+		if(isComplated == "false") {
+
+			this.dsTodo.setColumn( targetRow, "isCompleted", true );
+			
+		}
+		if(isComplated == "true") {
+		
+			this.dsTodo.setColumn( targetRow, "isCompleted", false );
+		}
+	}
+			
+	if(e.cellid == "Cell00") {
+	
+		this.dsTodo.deleteRow(targetRow);
+	}
+
+};
+this.Div00_Edit00_onkeydown = function(obj:nexacro.Edit,e:nexacro.KeyEventInfo)
+{
+	this.dsTodo.set_enableevent(false);
+	this.Div00.form.ListView00.set_enableevent(false);
+	this.Div00.form.ListView00.set_enableredraw(false);
+	
+	if(e.keycode == 13 && obj.value) {
+		var nRow = this.dsTodo.addRow();
+		this.dsTodo.setColumn(nRow, "text", obj.value);
+		this.dsTodo.setColumn(nRow, "isCompleted", false);
+		obj.set_value("");
+		obj.setFocus();			
+	}
+	
+	this.Div00.form.ListView00.set_enableredraw(true);
+	this.Div00.form.ListView00.set_enableevent(true);
+	this.dsTodo.set_enableevent(true);	
+};
+
+this.dsTodo_onrowsetchanged = function(obj:nexacro.NormalDataset,e:nexacro.DSRowsetChangeEventInfo)
+{
+	// 41 is REASON_ENABLEEVENT - When the enableevent property of a dataset was set to "true" 
+	if(e.reason == 41) {
+		obj.set_rowposition(0);
+	}
+};
+]]></Script>
+  </Form>
+</FDL>

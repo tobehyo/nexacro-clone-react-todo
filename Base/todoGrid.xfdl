@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FDL version="2.1">
+  <Form id="todoUseGrid" width="1920" height="1080" titletext="New Form" onload="todoUseGrid_onload" cssclass="todolist">
+    <Layouts>
+      <Layout height="1080" mobileorientation="landscape" width="1920">
+        <Static id="Static00" taborder="0" text="TODO" left="0" top="10" cssclass="h1" fittocontents="none" height="60" right="0"/>
+        <Div id="Div00" taborder="1" text="Div00" left="39.48%" top="90" width="400" cssclass="container" height="400">
+          <Layouts>
+            <Layout>
+              <Edit id="Edit00" taborder="0" left="10" top="10" height="47" onkeydown="Div00_Edit00_onkeydown" right="10"/>
+              <Grid id="Grid00" taborder="1" left="10" top="65" bottom="10" binddataset="dsTodo" autofittype="col" oncellclick="Div00_Grid00_oncellclick" autoenter="select" right="10" cssclass="todoGrid">
+                <Formats>
+                  <Format id="default">
+                    <Columns>
+                      <Column size="300"/>
+                      <Column size="100"/>
+                      <Column size="48"/>
+                    </Columns>
+                    <Rows>
+                      <Row size="40"/>
+                    </Rows>
+                    <Band id="body">
+                      <Cell text="bind:text" displaytype="text"/>
+                      <Cell col="1" text="Complate" displaytype="buttoncontrol" edittype="none"/>
+                      <Cell col="2" edittype="button" displaytype="buttoncontrol" text="X"/>
+                    </Band>
+                  </Format>
+                </Formats>
+              </Grid>
+            </Layout>
+            <Layout name="Tablet_screen"/>
+            <Layout name="Phone_screen">
+              <Edit id="Edit00" left="10" top="10" height="47" right="10"/>
+            </Layout>
+          </Layouts>
+        </Div>
+      </Layout>
+    </Layouts>
+    <Objects>
+      <Dataset id="dsTodo">
+        <ColumnInfo>
+          <Column id="divTodoId" type="STRING" size="256"/>
+          <Column id="text" type="STRING" size="256"/>
+          <Column id="isCompleted" type="STRING" size="256"/>
+        </ColumnInfo>
+        <Rows>
+          <Row>
+            <Col id="text">Learn about React</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+          <Row>
+            <Col id="text">Meet friend for lunch</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+          <Row>
+            <Col id="text">Build really cool todo app</Col>
+            <Col id="isCompleted">false</Col>
+          </Row>
+        </Rows>
+      </Dataset>
+    </Objects>
+    <Script type="xscript5.1"><![CDATA[this.todoUseGrid_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
+{
+	// isCompleted is column id which is bound dataset to Grid00.
+	this.Div00.form.Grid00.setCellProperty("body", 0, "cssclass", "expr:isCompleted=='true'?'strike':''");
+	
+	// turn off event for perfomance
+	this.dsTodo.set_enableevent(false);
+	this.Div00.form.Grid00.set_enableevent(false);
+	this.Div00.form.Grid00.set_enableredraw(false);
+	
+	for(var i=0; i<100000; i++) {
+		var nRow = this.dsTodo.addRow();
+		this.dsTodo.setColumn(nRow, "text", "Learn about React"+i);
+		this.dsTodo.setColumn(nRow, "isCompleted", false);
+	}
+	
+	// turn on event
+	this.Div00.form.Grid00.set_enableredraw(true);
+	this.Div00.form.Grid00.set_enableevent(true);
+	this.dsTodo.set_enableevent(true);
+	this.dsTodo.set_rowposition(0);
+
+};
+
+this.Div00_Edit00_onkeydown = function(obj:nexacro.Edit,e:nexacro.KeyEventInfo)
+{	
+	// if press "Enter" key, add todo list.
+	if(e.keycode == 13 && obj.value) {
+		var nRow = this.dsTodo.addRow();
+		this.dsTodo.setColumn(nRow, "text", obj.value);
+		this.dsTodo.setColumn(nRow, "isCompleted", false);
+		obj.set_value("");
+		obj.setFocus();			
+	}
+	
+};
+
+this.Div00_Grid00_oncellclick = function(obj:nexacro.Grid,e:nexacro.GridClickEventInfo)
+{
+	
+	var targetRow = e.row;
+	// when click Completed button
+	if(e.col == 1) {
+		
+		var isComplated = this.dsTodo.getColumn(targetRow, "isCompleted");
+		
+		if(isComplated == "false") {
+			this.dsTodo.setColumn( targetRow, "isCompleted", true );
+			
+		} 
+		if(isComplated == "true") {
+		
+			this.dsTodo.setColumn( targetRow, "isCompleted", false );
+		}
+	}
+	
+	// when click "X" button
+	if(e.col == 2) {	
+		this.dsTodo.deleteRow(targetRow);
+	}
+
+};]]></Script>
+  </Form>
+</FDL>
